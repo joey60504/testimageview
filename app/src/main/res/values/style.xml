@@ -1,0 +1,35 @@
+<resources>
+
+    <style name="BaseTheme" parent="Theme.MaterialComponents.Light.NoActionBar.Bridge">
+        <item name="alertDialogTheme">@style/AppCompatAlertDialogStyle</item>
+    </style>
+
+    <!--Base application theme. -->
+    <style name="AppTheme" parent="BaseTheme">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimaryDark">#ee3742</item>
+        <!--<item name="colorAccent">#ee3742</item>-->
+        <!--代表下劃線沒有獲取焦點的顏色-->
+        <item name="colorControlNormal">#61000000</item>
+        <!--colorControlActivated，colorControlHighlight代表了獲取焦點或者點擊的時候下劃線的顏色-->
+        <item name="colorControlActivated">#ee3742</item>
+        <!--        <item name="colorControlHighlight">#ee3742</item>-->
+        <!-- enable window content transitions -->
+        <item name="android:windowActivityTransitions">true</item>
+    </style>
+    <style name="FullActivity" parent="AppTheme">
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
+    <style name="AppCompatAlertDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <!-- Used for the buttons -->
+        <item name="colorAccent">#000</item>
+        <!-- Used for the title and text -->
+        <!--<item name="android:textColorPrimary">#FFFFFF</item>-->
+        <!-- Used for the background -->
+        <!--<item name="android:background">#4CAF50</item>-->
+    </style>
+
+
+</resources>
