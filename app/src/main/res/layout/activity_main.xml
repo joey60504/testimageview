@@ -23,9 +23,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@color/cardview_dark_background"
             android:transitionName="example_transition"
-            app:srcCompat="@drawable/cat" />
+            app:srcCompat="@drawable/n1" />
 
         <TextView
             android:id="@+id/textView4"

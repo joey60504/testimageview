@@ -13,23 +13,29 @@ import androidx.core.view.ViewCompat
 import com.example.myapplication.databinding.ActivityMainBinding
 
 
+
 class MainActivity : AppCompatActivity() {
+
     private lateinit var binding : ActivityMainBinding
+    val imageList = arrayListOf<Int>(
+        com.example.myapplication.R.drawable.cat,
+        com.example.myapplication.R.drawable.n2,
+        com.example.myapplication.R.drawable.cat,
+        com.example.myapplication.R.drawable.n4)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.imageViewImage.setImageResource(imageList[0])
         binding.imageViewImage.setOnClickListener{
-            myPicture = binding.imageViewImage
             val intent = Intent(this@MainActivity, SharedView::class.java)
+            var bundle = Bundle()
+            bundle.putIntegerArrayList("imageList",imageList)
+            intent.putExtra("image",bundle)
             val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
                 this@MainActivity, binding.imageViewImage, ViewCompat.getTransitionName(binding.imageViewImage)!!
             )
             startActivity(intent, options.toBundle())
         }
     }
-    companion object {
-        lateinit var myPicture: ImageView
-    }
 }
-
