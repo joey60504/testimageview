@@ -21,7 +21,8 @@ class MainActivity : AppCompatActivity() {
         com.example.myapplication.R.drawable.cat,
         com.example.myapplication.R.drawable.n2,
         com.example.myapplication.R.drawable.cat,
-        com.example.myapplication.R.drawable.n4)
+        com.example.myapplication.R.drawable.n4,
+        com.example.myapplication.R.drawable.building)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)

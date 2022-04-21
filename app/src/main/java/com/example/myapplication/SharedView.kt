@@ -15,16 +15,17 @@ import android.view.ScaleGestureDetector
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener
 import androidx.appcompat.app.AppCompatActivity
 import com.example.myapplication.databinding.ActivitySharedViewBinding
+import kotlin.math.abs
+import kotlin.math.min
 
 class SharedView : AppCompatActivity(){
-    //TODO 調整每一張圖片大小
     private var matrix: Matrix = Matrix()
     var martixValue = FloatArray(9)
 
-    var imageheight   :Float  = 0f
-    var imagewidth  :Float  = 0f
-    var screenwidth   :Float  = 0f
-    var screenheight  :Float  = 0f
+    var imageoriginalheight :Float  = 0f
+    var imageoriginalwidth  :Float  = 0f
+    var screenwidth         :Float  = 0f
+    var screenheight        :Float  = 0f
 
     var maxscale  = 4.0f
     var initscale = 1.0f
@@ -45,21 +46,8 @@ class SharedView : AppCompatActivity(){
         setContentView(binding.root)
         imagelist = intent.getBundleExtra("image")?.getIntegerArrayList("imageList") as ArrayList<Int>
         binding.imageViewDetail.setImageResource(imagelist[imageindex])
-
-        val displayMetrics = DisplayMetrics()
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
-        screenheight = displayMetrics.heightPixels.toFloat()
-        screenwidth  = displayMetrics.widthPixels.toFloat()
-
-        whenimagechange()
-        fixXY()
-
+        startfixscale()
         scaleGestureDetector = ScaleGestureDetector(this,ScaleListener())
-    }
-    fun whenimagechange(){
-        val Bitmap:Bitmap = BitmapFactory.decodeResource(resources,imagelist[imageindex])
-        imageheight = Bitmap.height.toFloat()
-        imagewidth = Bitmap.width.toFloat()
     }
     override fun onTouchEvent(motionEvent: MotionEvent): Boolean {
         scaleGestureDetector.onTouchEvent(motionEvent)
@@ -76,9 +64,9 @@ class SharedView : AppCompatActivity(){
                     else{
                         imageindex -= 1
                     }
+                    scaleback()
                     binding.imageViewDetail.setImageResource(imagelist[imageindex])
-//                    whenimagechange()
-//                    fixXY()
+                    startfixscale()
                 }
                 else if (endX - startX < -100f){
                     if(imageindex == (imagelist.size -1)){
@@ -87,27 +75,44 @@ class SharedView : AppCompatActivity(){
                     else{
                         imageindex += 1
                     }
+                    scaleback()
                     binding.imageViewDetail.setImageResource(imagelist[imageindex])
-//                    whenimagechange()
-//                    fixXY()
+                    startfixscale()
                 }
             }
         }
         return true
     }
-    fun fixXY(){
-        if (imagewidth > screenwidth && imageheight <= screenheight){
-            scale = screenwidth / imagewidth
-        }
-        if (imageheight > screenheight && imagewidth <= screenwidth){
-            scale = screenheight / imageheight
-        }
-        if (imagewidth > screenwidth && imageheight > screenheight) {
-            scale = Math.min(imagewidth / screenwidth, imageheight / screenheight)
-        }
-        matrix.postTranslate((screenwidth - imagewidth) / 2, (screenheight - imageheight) / 2)
-        matrix.postScale(scale, scale, screenwidth / 2, screenheight / 2)
+    fun scaleback(){
+        matrix.postScale(1/scale, 1/scale, screenwidth / 2, screenheight / 2)
         binding.imageViewDetail.imageMatrix = matrix
+    }
+    fun startfixscale(){
+        scale = 1.0f
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        screenheight = displayMetrics.heightPixels.toFloat()
+        screenwidth  = displayMetrics.widthPixels.toFloat()
+        val Bitmap:Bitmap = BitmapFactory.decodeResource(resources,imagelist[imageindex])
+        imageoriginalheight = Bitmap.height.toFloat()
+        imageoriginalwidth = Bitmap.width.toFloat()
+
+        if (imageoriginalwidth > screenwidth && imageoriginalheight <= screenheight){
+            scale = screenwidth / imageoriginalwidth
+        }
+        if (imageoriginalheight > screenheight && imageoriginalwidth <= screenwidth){
+            scale =  screenheight / imageoriginalheight
+        }
+        if (imageoriginalwidth > screenwidth && imageoriginalheight > screenheight) {
+            scale = min(screenwidth / imageoriginalwidth, screenheight / imageoriginalheight)
+        }
+        if (imageoriginalwidth < screenwidth && imageoriginalheight < screenheight) {
+            scale = min(screenwidth / imageoriginalwidth, screenheight / imageoriginalheight)
+        }
+        matrix.postScale(scale, scale, screenwidth / 2, screenheight / 2)
+        versioncontrol()
+        binding.imageViewDetail.imageMatrix = matrix
+
         initscale = scale
     }
     private inner class ScaleListener : SimpleOnScaleGestureListener() {
@@ -141,7 +146,7 @@ class SharedView : AppCompatActivity(){
     }
     fun versioncontrol(){
         val rectF = RectF()
-        rectF.set(0f, 0f, imagewidth,imageheight)
+        rectF.set(0f, 0f, imageoriginalwidth,imageoriginalheight)
         matrix.mapRect(rectF)
 
         var deltaX  = 0f
