@@ -1,34 +1,41 @@
 package com.example.myapplication
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.util.Log
+import android.graphics.Matrix
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.myapplication.databinding.ImageItemBinding
 
 class ViewPagerAdapter : RecyclerView.Adapter<ViewPagerAdapter.PagerViewHolder>() {
     private var mList: List<Int> = ArrayList()
+    var imageoriginalheight :Float  = 0f
+    var imageoriginalwidth  :Float  = 0f
+    var screenwidth         :Float  = 0f
+    var screenheight        :Float  = 0f
+    private var matrix: Matrix = Matrix()
+    private lateinit var binding: ImageItemBinding
+    class PagerViewHolder(val view :ImageItemBinding) : RecyclerView.ViewHolder(view.root)
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PagerViewHolder {
-        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.image_item, parent, false)
-        return PagerViewHolder(itemView)
+        binding= ImageItemBinding.inflate(LayoutInflater.from(parent.context),parent,false)
+        return PagerViewHolder(binding)
     }
     override fun onBindViewHolder(holder: PagerViewHolder, position: Int) {
-        holder.bindData(mList[position])
-        Log.d("kkk","123")
+        holder.view.ImageViewShow.setImageResource(mList[position])
+//        Log.d("kkk",imageoriginalwidth.toString())
+//        Log.d("kkk",imageoriginalheight.toString())
+//        Log.d("kkk",screenwidth.toString())
+//        Log.d("kkk",screenheight.toString())
     }
     fun setList(list: List<Int>) {
         mList = list
     }
+    fun setImagewidthheight(imagewidth:Float,imageheight:Float,width:Float,height:Float){
+        imageoriginalwidth = imagewidth
+        imageoriginalheight = imageheight
+        screenwidth = width
+        screenheight = height
+    }
     override fun getItemCount(): Int {
         return mList.size
-    }
-    //	ViewHolder需要繼承RecycleView.ViewHolder
-    class PagerViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        fun bindData(i: Int) {
-            itemView.findViewById<ImageView>(R.id.ImageViewShow).setImageResource(i)
-        }
     }
 }

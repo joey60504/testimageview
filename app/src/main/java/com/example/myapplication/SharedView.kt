@@ -6,8 +6,11 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.os.Bundle
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.ScaleGestureDetector
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import com.example.myapplication.databinding.ActivitySharedViewBinding
 
@@ -44,14 +47,24 @@ class SharedView : AppCompatActivity(){
         screenheight = displayMetrics.heightPixels.toFloat()
         screenwidth  = displayMetrics.widthPixels.toFloat()
 
-
         val myAdapter = ViewPagerAdapter()
         myAdapter.setList(imagelist)
         binding.viewpager.adapter = myAdapter
+        binding.viewpager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                val Bitmap:Bitmap = BitmapFactory.decodeResource(resources,imagelist[position])
+                imageoriginalheight = Bitmap.height.toFloat()
+                imageoriginalwidth = Bitmap.width.toFloat()
+
+                myAdapter.setImagewidthheight(imageoriginalwidth,imageoriginalheight,screenwidth,screenheight)
+                super.onPageSelected(position)
+            }
+        })
 //        binding.imageViewDetail.setImageResource(imagelist[imageindex])
 //        startfixscale()
 //        scaleGestureDetector = ScaleGestureDetector(this,ScaleListener())
     }
+
 //    override fun onTouchEvent(motionEvent: MotionEvent): Boolean {
 //        scaleGestureDetector.onTouchEvent(motionEvent)
 //        when(motionEvent.actionMasked){
