@@ -52,11 +52,11 @@ class SharedView : AppCompatActivity(){
         binding.viewpager.adapter = myAdapter
         binding.viewpager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-                val Bitmap:Bitmap = BitmapFactory.decodeResource(resources,imagelist[position])
-                imageoriginalheight = Bitmap.height.toFloat()
-                imageoriginalwidth = Bitmap.width.toFloat()
 
-                myAdapter.setImagewidthheight(imageoriginalwidth,imageoriginalheight,screenwidth,screenheight)
+                val Bitmap:Bitmap = BitmapFactory.decodeResource(resources,imagelist[position])
+                myAdapter.imageoriginalheight = Bitmap.height.toFloat()
+                myAdapter.imageoriginalwidth = Bitmap.width.toFloat()
+
                 super.onPageSelected(position)
             }
         })
