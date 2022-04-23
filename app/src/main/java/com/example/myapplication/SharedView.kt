@@ -10,9 +10,11 @@ import android.util.Log
 import android.view.ScaleGestureDetector
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.createBitmap
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import com.example.myapplication.databinding.ActivitySharedViewBinding
+
 
 class SharedView : AppCompatActivity(){
     private var matrix: Matrix = Matrix()
@@ -20,15 +22,15 @@ class SharedView : AppCompatActivity(){
 
     var imageoriginalheight :Float  = 0f
     var imageoriginalwidth  :Float  = 0f
-    var screenwidth         :Float  = 0f
-    var screenheight        :Float  = 0f
+    var screenwidth         =0
+    var screenheight        =0
 
     var maxscale  = 4.0f
     var initscale = 1.0f
     var scale     = 1.0f
     private var scaleFactor = 1.0f
 
-    var imagelist = arrayListOf<Int>()
+    lateinit var imagelist : ArrayList<Int>
     var startX :Float = 0f
     var endX   :Float = 0f
     var imageindex:Int= 0
@@ -40,30 +42,21 @@ class SharedView : AppCompatActivity(){
         super.onCreate(savedInstanceState)
         binding = ActivitySharedViewBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        imagelist = intent.getBundleExtra("image")?.getIntegerArrayList("imageList") as ArrayList<Int>
+        imagelist= intent.getIntegerArrayListExtra("imageList")!!
 
-        val displayMetrics = DisplayMetrics()
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
-        screenheight = displayMetrics.heightPixels.toFloat()
-        screenwidth  = displayMetrics.widthPixels.toFloat()
-
-        val myAdapter = ViewPagerAdapter()
-        myAdapter.setList(imagelist)
+        val myAdapter = ViewPagerAdapter(imagelist)
         binding.viewpager.adapter = myAdapter
         binding.viewpager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-
-                val Bitmap:Bitmap = BitmapFactory.decodeResource(resources,imagelist[position])
-                myAdapter.imageoriginalheight = Bitmap.height.toFloat()
-                myAdapter.imageoriginalwidth = Bitmap.width.toFloat()
-
                 super.onPageSelected(position)
+                Log.d("kkp",position.toString())
             }
         })
 //        binding.imageViewDetail.setImageResource(imagelist[imageindex])
 //        startfixscale()
 //        scaleGestureDetector = ScaleGestureDetector(this,ScaleListener())
     }
+
 
 //    override fun onTouchEvent(motionEvent: MotionEvent): Boolean {
 //        scaleGestureDetector.onTouchEvent(motionEvent)
