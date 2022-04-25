@@ -4,6 +4,7 @@ import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.graphics.RectF
 import android.graphics.drawable.BitmapDrawable
 import android.media.Image
 import android.util.DisplayMetrics
@@ -17,10 +18,11 @@ import androidx.core.view.drawToBitmap
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import com.example.myapplication.databinding.ImageItemBinding
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 class ViewPagerAdapter(private val mList:ArrayList<Int>) : RecyclerView.Adapter<ViewPagerAdapter.PagerViewHolder>() {
-
+    private var matrix: Matrix = Matrix()
     private lateinit var binding: ImageItemBinding
     class PagerViewHolder(val view :ImageItemBinding) : RecyclerView.ViewHolder(view.root)
 
@@ -32,7 +34,7 @@ class ViewPagerAdapter(private val mList:ArrayList<Int>) : RecyclerView.Adapter<
 //        取得螢幕寬度
         val displayMetrics=Resources.getSystem().displayMetrics
 //        取得原始圖檔
-        val originBitmap=BitmapFactory.decodeResource(Resources.getSystem(),mList[position])
+        val originBitmap=BitmapFactory.decodeResource(holder.view.ImageViewShow.resources,mList[position])
 
 //        要設定的圖寬
         val imgWidth=displayMetrics.widthPixels
@@ -53,4 +55,5 @@ class ViewPagerAdapter(private val mList:ArrayList<Int>) : RecyclerView.Adapter<
     override fun getItemCount(): Int {
         return mList.size
     }
+
 }
