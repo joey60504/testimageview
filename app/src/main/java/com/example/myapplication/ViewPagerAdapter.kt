@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.databinding.ImageItemBinding
 import kotlin.math.roundToInt
@@ -41,7 +42,7 @@ class ViewPagerAdapter(private val mList: ArrayList<Int>,private val itemListene
 //        注入bitmap
         holder.view.ImageViewShow.setImageBitmap(newBitmap)
         holder.view.ImageViewShow.setOnTouchListener { v, event ->
-            itemListener.OnItemTouch(position,event)
+            itemListener.OnItemTouch(position,event,holder.view.ImageViewShow)
             true
         }
     }
@@ -50,6 +51,6 @@ class ViewPagerAdapter(private val mList: ArrayList<Int>,private val itemListene
         return mList.size
     }
     interface OnItemTouchListener {
-        fun OnItemTouch(postition: Int, event: MotionEvent)
+        fun OnItemTouch(postition: Int, v: MotionEvent, imageViewShow: ImageView)
     }
 }

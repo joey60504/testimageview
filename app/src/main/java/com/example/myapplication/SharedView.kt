@@ -1,15 +1,21 @@
 package com.example.myapplication
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.graphics.RectF
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.util.Log
+import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.example.myapplication.databinding.ActivitySharedViewBinding
+import kotlin.math.min
 
 
 class SharedView : AppCompatActivity(),ViewPagerAdapter.OnItemTouchListener{
@@ -20,16 +26,19 @@ class SharedView : AppCompatActivity(),ViewPagerAdapter.OnItemTouchListener{
     var imageoriginalwidth  :Float  = 0f
     var screenwidth         :Float  = 0f
     var screenheight        :Float  = 0f
-
     var maxscale  = 4.0f
     var initscale = 1.0f
     var scale     = 1.0f
+    private var startDis :Float = 0f
+    private var endDis :Float = 0f
+    var startPointX0:Float=0f
+    var startPointY0:Float=0f
+    var startPointX1:Float=0f
+    var startPointY1:Float=0f
+    var midX:Float=0f
+    var midY:Float=0f
     private var scaleFactor = 1.0f
-
     lateinit var imagelist : ArrayList<Int>
-    var startX :Float = 0f
-    var endX   :Float = 0f
-    var imageindex:Int= 0
     private lateinit var scaleGestureDetector: ScaleGestureDetector
     private lateinit var binding : ActivitySharedViewBinding
     @SuppressLint("ClickableViewAccessibility")
@@ -45,85 +54,70 @@ class SharedView : AppCompatActivity(),ViewPagerAdapter.OnItemTouchListener{
         binding.viewpager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                Log.d("kkp",position.toString())
             }
         })
-//        binding.imageViewDetail.setImageResource(imagelist[imageindex])
-//        startfixscale()
 //        scaleGestureDetector = ScaleGestureDetector(this,ScaleListener())
     }
 
-    override fun OnItemTouch(postition: Int, event: MotionEvent) {
-        Log.d("kkk","123")
+    override fun OnItemTouch(postition: Int,move:MotionEvent, v: ImageView) {
+        getinitscale(postition)
+        val scale: Float = getscale()
+        when(move.actionMasked){
+            MotionEvent.ACTION_POINTER_DOWN->{
+                startPointX0 = move.getX(0)
+                startPointY0 = move.getY(0)
+                startPointX1 = move.getX(1)
+                startPointY1 = move.getY(1)
+                startDis = distance()
+                if(startDis > 10f){
+                    getmid()
+                }
+                Log.d("kkkx0",startPointX0.toString())
+                Log.d("kkky0",startPointY0.toString())
+                Log.d("kkkx1",startPointX1.toString())
+                Log.d("kkky1",startPointY1.toString())
+            }
+            MotionEvent.ACTION_MOVE -> {
+                startPointX0 = move.getX(0)
+                startPointY0 = move.getY(0)
+
+                startPointX1 = move.getX(1)
+                startPointY1 = move.getY(1)
+                endDis=distance()
+                scaleFactor = endDis/startDis
+                Log.d("kkkx0",startPointX0.toString())
+                Log.d("kkky0",startPointY0.toString())
+                Log.d("kkkx1",startPointX1.toString())
+                Log.d("kkky1",startPointY1.toString())
+            }
+        }
+    }
+    fun getinitscale(postition:Int){
+        scale = 1.0f
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        screenheight = displayMetrics.heightPixels.toFloat()
+        screenwidth  = displayMetrics.widthPixels.toFloat()
+        val Bitmap: Bitmap = BitmapFactory.decodeResource(resources,imagelist[postition])
+        imageoriginalheight = Bitmap.height.toFloat()
+        imageoriginalwidth = Bitmap.width.toFloat()
+
+        if (imageoriginalwidth > screenwidth && imageoriginalheight <= screenheight){
+            scale = screenwidth / imageoriginalwidth
+        }
+        if (imageoriginalheight > screenheight && imageoriginalwidth <= screenwidth){
+            scale =  screenheight / imageoriginalheight
+        }
+        if (imageoriginalwidth > screenwidth && imageoriginalheight > screenheight) {
+            scale = min(screenwidth / imageoriginalwidth, screenheight / imageoriginalheight)
+        }
+        if (imageoriginalwidth < screenwidth && imageoriginalheight < screenheight) {
+            scale = min(screenwidth / imageoriginalwidth, screenheight / imageoriginalheight)
+        }
+        initscale = scale
     }
 
-//    override fun onTouchEvent(motionEvent: MotionEvent): Boolean {
-//        scaleGestureDetector.onTouchEvent(motionEvent)
-//        when(motionEvent.actionMasked){
-//            MotionEvent.ACTION_DOWN->{
-//                startX = motionEvent.getX()
-//            }
-//            MotionEvent.ACTION_UP->{
-//                endX = motionEvent.getX()
-//                if(endX - startX > 100f){
-//                    if(imageindex == 0){
-//                        imageindex = imagelist.size - 1
-//                    }
-//                    else{
-//                        imageindex -= 1
-//                    }
-//                    scaleback()
-//                    binding.imageViewDetail.setImageResource(imagelist[imageindex])
-//                    startfixscale()
-//                }
-//                else if (endX - startX < -100f){
-//                    if(imageindex == (imagelist.size -1)){
-//                        imageindex = 0
-//                    }
-//                    else{
-//                        imageindex += 1
-//                    }
-//                    scaleback()
-//                    binding.imageViewDetail.setImageResource(imagelist[imageindex])
-//                    startfixscale()
-//                }
-//            }
-//        }
-//        return true
-//    }
-//    fun scaleback(){
-//        matrix.postScale(1/scale, 1/scale, screenwidth / 2, screenheight / 2)
-//        binding.imageViewDetail.imageMatrix = matrix
-//    }
-//    fun startfixscale(){
-//        scale = 1.0f
-//        val displayMetrics = DisplayMetrics()
-//        windowManager.defaultDisplay.getMetrics(displayMetrics)
-//        screenheight = displayMetrics.heightPixels.toFloat()
-//        screenwidth  = displayMetrics.widthPixels.toFloat()
-//        val Bitmap:Bitmap = BitmapFactory.decodeResource(resources,imagelist[imageindex])
-//        imageoriginalheight = Bitmap.height.toFloat()
-//        imageoriginalwidth = Bitmap.width.toFloat()
-//
-//        if (imageoriginalwidth > screenwidth && imageoriginalheight <= screenheight){
-//            scale = screenwidth / imageoriginalwidth
-//        }
-//        if (imageoriginalheight > screenheight && imageoriginalwidth <= screenwidth){
-//            scale =  screenheight / imageoriginalheight
-//        }
-//        if (imageoriginalwidth > screenwidth && imageoriginalheight > screenheight) {
-//            scale = min(screenwidth / imageoriginalwidth, screenheight / imageoriginalheight)
-//        }
-//        if (imageoriginalwidth < screenwidth && imageoriginalheight < screenheight) {
-//            scale = min(screenwidth / imageoriginalwidth, screenheight / imageoriginalheight)
-//        }
-//        matrix.postScale(scale, scale, screenwidth / 2, screenheight / 2)
-//        versioncontrol()
-//        binding.imageViewDetail.imageMatrix = matrix
-//
-//        initscale = scale
-//    }
-//    private inner class ScaleListener : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+//    private inner class ScaleListener : ScaleGestureDetector.SimpleOnScaleGestureListener(){
 //        override fun onScaleBegin(scaleGestureDetector: ScaleGestureDetector): Boolean {
 //            return super.onScaleBegin(scaleGestureDetector)
 //        }
@@ -139,7 +133,6 @@ class SharedView : AppCompatActivity(),ViewPagerAdapter.OnItemTouchListener{
 //                }
 //                matrix.postScale(scaleFactor, scaleFactor, scaleGestureDetector.focusX, scaleGestureDetector.focusY)
 //                versioncontrol()
-//                binding.imageViewDetail.imageMatrix = matrix
 //            }
 //            return true
 //        }
@@ -148,10 +141,10 @@ class SharedView : AppCompatActivity(),ViewPagerAdapter.OnItemTouchListener{
 //            super.onScaleEnd(scaleGestureDetector)
 //        }
 //    }
-//    fun getscale() :Float{
-//        matrix.getValues(martixValue)
-//        return martixValue[Matrix.MSCALE_X]
-//    }
+    fun getscale() :Float{
+        matrix.getValues(martixValue)
+        return martixValue[Matrix.MSCALE_X]
+    }
 //    fun versioncontrol(){
 //        val rectF = RectF()
 //        rectF.set(0f, 0f, imageoriginalwidth,imageoriginalheight)
@@ -183,4 +176,13 @@ class SharedView : AppCompatActivity(),ViewPagerAdapter.OnItemTouchListener{
 //        }
 //        matrix.postTranslate(deltaX, deltaY)
 //    }
+    fun distance(): Float {
+        var dx :Float = startPointX0-startPointX1
+        var dy :Float = startPointY0-startPointY1
+        return kotlin.math.sqrt(dx * dx + dy * dy)
+    }
+    fun getmid() {
+        midX= (startPointX0+startPointX1) / 2
+        midY= (startPointY0+startPointY1) / 2;
+    }
 }
