@@ -1,28 +1,17 @@
 package com.example.myapplication
 
+import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Matrix
-import android.graphics.RectF
-import android.graphics.drawable.BitmapDrawable
-import android.media.Image
-import android.util.DisplayMetrics
-import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.ViewGroup
-import androidx.core.graphics.createBitmap
-import androidx.core.graphics.drawable.toBitmap
-import androidx.core.graphics.drawable.toDrawable
-import androidx.core.view.drawToBitmap
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager.widget.ViewPager
 import com.example.myapplication.databinding.ImageItemBinding
-import kotlin.math.min
 import kotlin.math.roundToInt
 
-class ViewPagerAdapter(private val mList:ArrayList<Int>) : RecyclerView.Adapter<ViewPagerAdapter.PagerViewHolder>() {
-    private var matrix: Matrix = Matrix()
+class ViewPagerAdapter(private val mList: ArrayList<Int>,private val itemListener:OnItemTouchListener) : RecyclerView.Adapter<ViewPagerAdapter.PagerViewHolder>() {
     private lateinit var binding: ImageItemBinding
     class PagerViewHolder(val view :ImageItemBinding) : RecyclerView.ViewHolder(view.root)
 
@@ -30,6 +19,7 @@ class ViewPagerAdapter(private val mList:ArrayList<Int>) : RecyclerView.Adapter<
         binding= ImageItemBinding.inflate(LayoutInflater.from(parent.context),parent,false)
         return PagerViewHolder(binding)
     }
+    @SuppressLint("ClickableViewAccessibility")
     override fun onBindViewHolder(holder: PagerViewHolder, position: Int) {
 //        取得螢幕寬度
         val displayMetrics=Resources.getSystem().displayMetrics
@@ -50,10 +40,16 @@ class ViewPagerAdapter(private val mList:ArrayList<Int>) : RecyclerView.Adapter<
 
 //        注入bitmap
         holder.view.ImageViewShow.setImageBitmap(newBitmap)
+        holder.view.ImageViewShow.setOnTouchListener { v, event ->
+            itemListener.OnItemTouch(position,event)
+            true
+        }
     }
 
     override fun getItemCount(): Int {
         return mList.size
     }
-
+    interface OnItemTouchListener {
+        fun OnItemTouch(postition: Int, event: MotionEvent)
+    }
 }

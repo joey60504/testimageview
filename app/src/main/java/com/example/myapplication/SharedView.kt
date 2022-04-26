@@ -1,29 +1,25 @@
 package com.example.myapplication
 
 import android.annotation.SuppressLint
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.graphics.RectF
 import android.os.Bundle
-import android.util.DisplayMetrics
 import android.util.Log
+import android.view.MotionEvent
 import android.view.ScaleGestureDetector
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.graphics.createBitmap
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import com.example.myapplication.databinding.ActivitySharedViewBinding
 
 
-class SharedView : AppCompatActivity(){
+class SharedView : AppCompatActivity(),ViewPagerAdapter.OnItemTouchListener{
     private var matrix: Matrix = Matrix()
     var martixValue = FloatArray(9)
 
     var imageoriginalheight :Float  = 0f
     var imageoriginalwidth  :Float  = 0f
-    var screenwidth         =0
-    var screenheight        =0
+    var screenwidth         :Float  = 0f
+    var screenheight        :Float  = 0f
 
     var maxscale  = 4.0f
     var initscale = 1.0f
@@ -44,7 +40,7 @@ class SharedView : AppCompatActivity(){
         setContentView(binding.root)
         imagelist= intent.getIntegerArrayListExtra("imageList")!!
 
-        val myAdapter = ViewPagerAdapter(imagelist)
+        val myAdapter = ViewPagerAdapter(imagelist, this@SharedView)
         binding.viewpager.adapter = myAdapter
         binding.viewpager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
@@ -57,6 +53,9 @@ class SharedView : AppCompatActivity(){
 //        scaleGestureDetector = ScaleGestureDetector(this,ScaleListener())
     }
 
+    override fun OnItemTouch(postition: Int, event: MotionEvent) {
+        Log.d("kkk","123")
+    }
 
 //    override fun onTouchEvent(motionEvent: MotionEvent): Boolean {
 //        scaleGestureDetector.onTouchEvent(motionEvent)
@@ -124,7 +123,7 @@ class SharedView : AppCompatActivity(){
 //
 //        initscale = scale
 //    }
-//    private inner class ScaleListener : SimpleOnScaleGestureListener() {
+//    private inner class ScaleListener : ScaleGestureDetector.SimpleOnScaleGestureListener() {
 //        override fun onScaleBegin(scaleGestureDetector: ScaleGestureDetector): Boolean {
 //            return super.onScaleBegin(scaleGestureDetector)
 //        }
