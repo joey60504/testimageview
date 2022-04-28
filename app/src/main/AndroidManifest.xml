@@ -10,7 +10,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication">
         <activity
-            android:name=".RotateZoomImageView"
+            android:name=".sharedView2"
+            android:exported="false" />
+        <activity
+            android:name=".imageswitcher"
             android:exported="false" />
         <activity
             android:name=".SharedView"

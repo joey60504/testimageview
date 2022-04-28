@@ -29,6 +29,7 @@ class SharedView : AppCompatActivity(),ViewPagerAdapter.OnItemTouchListener{
     var maxscale  = 4.0f
     var initscale = 1.0f
     var scale     = 1.0f
+
     private var startDis :Float = 0f
     private var endDis :Float = 0f
     var startPointX0:Float=0f
@@ -37,6 +38,7 @@ class SharedView : AppCompatActivity(),ViewPagerAdapter.OnItemTouchListener{
     var startPointY1:Float=0f
     var midX:Float=0f
     var midY:Float=0f
+    var mode = 0
     private var scaleFactor = 1.0f
     lateinit var imagelist : ArrayList<Int>
     private lateinit var scaleGestureDetector: ScaleGestureDetector
@@ -47,6 +49,7 @@ class SharedView : AppCompatActivity(),ViewPagerAdapter.OnItemTouchListener{
         super.onCreate(savedInstanceState)
         binding = ActivitySharedViewBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
         imagelist= intent.getIntegerArrayListExtra("imageList")!!
 
         val myAdapter = ViewPagerAdapter(imagelist, this@SharedView)
@@ -63,7 +66,11 @@ class SharedView : AppCompatActivity(),ViewPagerAdapter.OnItemTouchListener{
         getinitscale(postition)
         val scale: Float = getscale()
         when(move.actionMasked){
+            MotionEvent.ACTION_DOWN->{
+                mode = 0
+            }
             MotionEvent.ACTION_POINTER_DOWN->{
+                mode = 1
                 startPointX0 = move.getX(0)
                 startPointY0 = move.getY(0)
                 startPointX1 = move.getX(1)
@@ -72,23 +79,28 @@ class SharedView : AppCompatActivity(),ViewPagerAdapter.OnItemTouchListener{
                 if(startDis > 10f){
                     getmid()
                 }
-                Log.d("kkkx0",startPointX0.toString())
-                Log.d("kkky0",startPointY0.toString())
-                Log.d("kkkx1",startPointX1.toString())
-                Log.d("kkky1",startPointY1.toString())
             }
             MotionEvent.ACTION_MOVE -> {
-                startPointX0 = move.getX(0)
-                startPointY0 = move.getY(0)
+                if(mode == 1) {
+                    startPointX0 = move.getX(0)
+                    startPointY0 = move.getY(0)
 
-                startPointX1 = move.getX(1)
-                startPointY1 = move.getY(1)
-                endDis=distance()
-                scaleFactor = endDis/startDis
-                Log.d("kkkx0",startPointX0.toString())
-                Log.d("kkky0",startPointY0.toString())
-                Log.d("kkkx1",startPointX1.toString())
-                Log.d("kkky1",startPointY1.toString())
+                    startPointX1 = move.getX(1)
+                    startPointY1 = move.getY(1)
+                    endDis = distance()
+                    scaleFactor = endDis / startDis
+                    if (scale < maxscale && scaleFactor > 1.0f || scale > initscale && scaleFactor < 1.0f) {
+                        if (scaleFactor * scale < initscale){
+                            scaleFactor = initscale / scale
+                        }
+                        if (scaleFactor * scale > maxscale){
+                            scaleFactor = maxscale / scale
+                        }
+                        matrix.postScale(scaleFactor, scaleFactor, midX, midY)
+                        versioncontrol()
+                        v.imageMatrix = matrix
+                    }
+                }
             }
         }
     }
@@ -145,37 +157,37 @@ class SharedView : AppCompatActivity(),ViewPagerAdapter.OnItemTouchListener{
         matrix.getValues(martixValue)
         return martixValue[Matrix.MSCALE_X]
     }
-//    fun versioncontrol(){
-//        val rectF = RectF()
-//        rectF.set(0f, 0f, imageoriginalwidth,imageoriginalheight)
-//        matrix.mapRect(rectF)
-//
-//        var deltaX  = 0f
-//        var deltaY  = 0f
-//        if (rectF.width() >= screenwidth) {
-//            if (rectF.left > 0) {
-//                deltaX = -rectF.left
-//            }
-//            if (rectF.right < screenwidth) {
-//                deltaX = screenwidth - rectF.right
-//            }
-//        }
-//        if (rectF.height() >= screenheight) {
-//            if (rectF.top > 0) {
-//                deltaY = -rectF.top
-//            }
-//            if (rectF.bottom < screenheight) {
-//                deltaY = screenheight - rectF.bottom
-//            }
-//        }
-//        if (rectF.width() < screenwidth) {
-//            deltaX = screenwidth * 0.5f - rectF.right + 0.5f * rectF.width()
-//        }
-//        if (rectF.height() < screenheight) {
-//            deltaY = screenheight * 0.5f - rectF.bottom + 0.5f * rectF.height()
-//        }
-//        matrix.postTranslate(deltaX, deltaY)
-//    }
+    fun versioncontrol(){
+        val rectF = RectF()
+        rectF.set(0f, 0f, imageoriginalwidth,imageoriginalheight)
+        matrix.mapRect(rectF)
+
+        var deltaX  = 0f
+        var deltaY  = 0f
+        if (rectF.width() >= screenwidth) {
+            if (rectF.left > 0) {
+                deltaX = -rectF.left
+            }
+            if (rectF.right < screenwidth) {
+                deltaX = screenwidth - rectF.right
+            }
+        }
+        if (rectF.height() >= screenheight) {
+            if (rectF.top > 0) {
+                deltaY = -rectF.top
+            }
+            if (rectF.bottom < screenheight) {
+                deltaY = screenheight - rectF.bottom
+            }
+        }
+        if (rectF.width() < screenwidth) {
+            deltaX = screenwidth * 0.5f - rectF.right + 0.5f * rectF.width()
+        }
+        if (rectF.height() < screenheight) {
+            deltaY = screenheight * 0.5f - rectF.bottom + 0.5f * rectF.height()
+        }
+        matrix.postTranslate(deltaX, deltaY)
+    }
     fun distance(): Float {
         var dx :Float = startPointX0-startPointX1
         var dy :Float = startPointY0-startPointY1

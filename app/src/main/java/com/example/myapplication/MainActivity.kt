@@ -33,5 +33,27 @@ class MainActivity : AppCompatActivity() {
             )
             startActivity(intent, options.toBundle())
         }
+        binding.textView4.setOnClickListener{
+            val intent = Intent(this@MainActivity, imageswitcher::class.java)
+//            val bundle = Bundle()
+//            bundle.putIntegerArrayList("imageList",imageList)
+//            intent.putExtra("image",bundle)
+            intent.putExtra("imageList",imageList)
+            val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                this@MainActivity, binding.imageViewImage, ViewCompat.getTransitionName(binding.imageViewImage)!!
+            )
+            startActivity(intent, options.toBundle())
+        }
+        binding.textView5.setOnClickListener{
+            val intent = Intent(this@MainActivity, sharedView2::class.java)
+//            val bundle = Bundle()
+//            bundle.putIntegerArrayList("imageList",imageList)
+//            intent.putExtra("image",bundle)
+            intent.putExtra("imageList",imageList)
+            val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                this@MainActivity, binding.imageViewImage, ViewCompat.getTransitionName(binding.imageViewImage)!!
+            )
+            startActivity(intent, options.toBundle())
+        }
     }
 }
