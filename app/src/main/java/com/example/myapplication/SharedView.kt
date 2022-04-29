@@ -135,12 +135,20 @@ class SharedView : AppCompatActivity(),ViewPagerAdapter.OnItemTouchListener{
 //    }
     private fun changeViewSize(enddis:Float,startdis:Float,point:Point,imageView: ImageView,postition: Int){
         scaleFactor = enddis / startdis
-        Log.d("kkk",scaleFactor.toString())
-        matrix.postScale(scaleFactor,scaleFactor,point.x.toFloat(),point.y.toFloat())
-        versioncontrol(imageView,postition)
-        imageView.imageMatrix = matrix
+        val scalematrix = getscale()
+        if (scalematrix < maxscale && scaleFactor > 1.0f || scalematrix > initscale && scaleFactor < 1.0f) {
+            if (scaleFactor * scalematrix < initscale){
+                scaleFactor = initscale / scalematrix
+            }
+            if (scaleFactor * scalematrix > maxscale){
+                scaleFactor = maxscale / scalematrix
+            }
+            matrix.postScale(scaleFactor, scaleFactor,point.x.toFloat(), point.y.toFloat())
+            versioncontrol(postition)
+            imageView.imageMatrix = matrix
+        }
     }
-    fun versioncontrol(imageView: ImageView,postition: Int){
+    fun versioncontrol(postition: Int){
         val rectF : RectF = getMatrixRectF(postition)
         var deltaX  = 0f
         var deltaY  = 0f
@@ -167,7 +175,6 @@ class SharedView : AppCompatActivity(),ViewPagerAdapter.OnItemTouchListener{
             deltaY = screenheight * 0.5f - rectF.bottom + 0.5f * rectF.height()
         }
         matrix.postTranslate(deltaX, deltaY)
-        imageView.imageMatrix = matrix
     }
     fun getscale() :Float{
         matrix.getValues(martixValue)
