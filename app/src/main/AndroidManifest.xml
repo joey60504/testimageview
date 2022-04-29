@@ -16,6 +16,9 @@
             android:name=".imageswitcher"
             android:exported="false" />
         <activity
+            android:name=".CycTest"
+            android:exported="false" />
+        <activity
             android:name=".SharedView"
             android:exported="false" />
         <activity

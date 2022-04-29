@@ -55,5 +55,14 @@ class MainActivity : AppCompatActivity() {
             )
             startActivity(intent, options.toBundle())
         }
+        binding.textView6.setOnClickListener {
+            Intent(this,CycTest::class.java).apply {
+                putExtra("imageList",imageList)
+                val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                    this@MainActivity, binding.imageViewImage, ViewCompat.getTransitionName(binding.imageViewImage)!!
+                )
+                startActivity(this,options.toBundle())
+            }
+        }
     }
 }
