@@ -1,16 +1,13 @@
 package com.example.myapplication
 
 import android.annotation.SuppressLint
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Matrix
-import android.graphics.RectF
+import android.graphics.*
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.util.Log
-import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
+import android.view.View
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
@@ -19,29 +16,27 @@ import kotlin.math.min
 
 
 class SharedView : AppCompatActivity(),ViewPagerAdapter.OnItemTouchListener{
-    private var matrix: Matrix = Matrix()
-    var martixValue = FloatArray(9)
-
+    //螢幕,圖片寬度
     var imageoriginalheight :Float  = 0f
     var imageoriginalwidth  :Float  = 0f
     var screenwidth         :Float  = 0f
     var screenheight        :Float  = 0f
+    //縮放
     var maxscale  = 4.0f
     var initscale = 1.0f
     var scale     = 1.0f
-
+    private var matrix: Matrix = Matrix()
+    private var oldmatrix: Matrix = Matrix()
+    var martixValue = FloatArray(9)
+    private var scaleFactor = 1.0f
+    private lateinit var scaleGestureDetector: ScaleGestureDetector
+    //Touchevent
+    var mode = 0
+    private var mPoint = Point()
     private var startDis :Float = 0f
     private var endDis :Float = 0f
-    var startPointX0:Float=0f
-    var startPointY0:Float=0f
-    var startPointX1:Float=0f
-    var startPointY1:Float=0f
-    var midX:Float=0f
-    var midY:Float=0f
-    var mode = 0
-    private var scaleFactor = 1.0f
+
     lateinit var imagelist : ArrayList<Int>
-    private lateinit var scaleGestureDetector: ScaleGestureDetector
     private lateinit var binding : ActivitySharedViewBinding
     @SuppressLint("ClickableViewAccessibility")
 
@@ -62,50 +57,35 @@ class SharedView : AppCompatActivity(),ViewPagerAdapter.OnItemTouchListener{
 //        scaleGestureDetector = ScaleGestureDetector(this,ScaleListener())
     }
 
-    override fun OnItemTouch(postition: Int,move:MotionEvent, v: ImageView) {
+    override fun OnItemTouch(postition: Int, view: View, move:MotionEvent, imageView: ImageView) {
         getinitscale(postition)
-        val scale: Float = getscale()
         when(move.actionMasked){
             MotionEvent.ACTION_DOWN->{
-                mode = 0
-            }
-            MotionEvent.ACTION_POINTER_DOWN->{
                 mode = 1
-                startPointX0 = move.getX(0)
-                startPointY0 = move.getY(0)
-                startPointX1 = move.getX(1)
-                startPointY1 = move.getY(1)
-                startDis = distance()
-                if(startDis > 10f){
-                    getmid()
-                }
+                binding.viewpager.isUserInputEnabled = true
             }
             MotionEvent.ACTION_MOVE -> {
-                if(mode == 1) {
-                    startPointX0 = move.getX(0)
-                    startPointY0 = move.getY(0)
-
-                    startPointX1 = move.getX(1)
-                    startPointY1 = move.getY(1)
-                    endDis = distance()
-                    scaleFactor = endDis / startDis
-                    if (scale < maxscale && scaleFactor > 1.0f || scale > initscale && scaleFactor < 1.0f) {
-                        if (scaleFactor * scale < initscale){
-                            scaleFactor = initscale / scale
-                        }
-                        if (scaleFactor * scale > maxscale){
-                            scaleFactor = maxscale / scale
-                        }
-                        matrix.postScale(scaleFactor, scaleFactor, midX, midY)
-                        versioncontrol()
-                        v.imageMatrix = matrix
+                if(mode == 2){
+                    endDis = calculateDist(move)
+                    if (endDis > startDis + 1) {
+                        changeViewSize(startDis, endDis, mPoint,imageView,postition)
+                        startDis = endDis;
+                    }
+                    if (startDis > endDis + 1){
+                        changeViewSize(startDis, endDis, mPoint,imageView,postition)
+                        startDis = endDis;
                     }
                 }
+            }
+            MotionEvent.ACTION_POINTER_DOWN->{
+                mode = 2
+                startDis = calculateDist(move)
+                mPoint = getMiPoint(move)
+                binding.viewpager.isUserInputEnabled = false
             }
         }
     }
     fun getinitscale(postition:Int){
-        scale = 1.0f
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(displayMetrics)
         screenheight = displayMetrics.heightPixels.toFloat()
@@ -153,15 +133,15 @@ class SharedView : AppCompatActivity(),ViewPagerAdapter.OnItemTouchListener{
 //            super.onScaleEnd(scaleGestureDetector)
 //        }
 //    }
-    fun getscale() :Float{
-        matrix.getValues(martixValue)
-        return martixValue[Matrix.MSCALE_X]
+    private fun changeViewSize(enddis:Float,startdis:Float,point:Point,imageView: ImageView,postition: Int){
+        scaleFactor = enddis / startdis
+        Log.d("kkk",scaleFactor.toString())
+        matrix.postScale(scaleFactor,scaleFactor,point.x.toFloat(),point.y.toFloat())
+        versioncontrol(imageView,postition)
+        imageView.imageMatrix = matrix
     }
-    fun versioncontrol(){
-        val rectF = RectF()
-        rectF.set(0f, 0f, imageoriginalwidth,imageoriginalheight)
-        matrix.mapRect(rectF)
-
+    fun versioncontrol(imageView: ImageView,postition: Int){
+        val rectF : RectF = getMatrixRectF(postition)
         var deltaX  = 0f
         var deltaY  = 0f
         if (rectF.width() >= screenwidth) {
@@ -187,14 +167,30 @@ class SharedView : AppCompatActivity(),ViewPagerAdapter.OnItemTouchListener{
             deltaY = screenheight * 0.5f - rectF.bottom + 0.5f * rectF.height()
         }
         matrix.postTranslate(deltaX, deltaY)
+        imageView.imageMatrix = matrix
     }
-    fun distance(): Float {
-        var dx :Float = startPointX0-startPointX1
-        var dy :Float = startPointY0-startPointY1
-        return kotlin.math.sqrt(dx * dx + dy * dy)
+    fun getscale() :Float{
+        matrix.getValues(martixValue)
+        return martixValue[Matrix.MSCALE_X]
     }
-    fun getmid() {
-        midX= (startPointX0+startPointX1) / 2
-        midY= (startPointY0+startPointY1) / 2;
+    private fun calculateDist(event: MotionEvent): Float {
+        val x = event.getX(0) - event.getX(1)
+        val y = event.getY(0) - event.getY(1)
+        return Math.sqrt((x * x + y * y).toDouble()).toFloat()
+    }
+    private fun getMiPoint(event: MotionEvent): Point {
+        val x = event.getX(0) + event.getX(1)
+        val y = event.getY(0) + event.getY(1)
+        mPoint.set(x.toInt() / 2, y.toInt() / 2)
+        return mPoint
+    }
+    private fun getMatrixRectF(postition: Int): RectF {
+        val rect = RectF()
+        val d = getDrawable(imagelist[postition])
+        if (null != d) {
+            rect[0f, 0f, d.intrinsicWidth.toFloat()] = d.intrinsicHeight.toFloat()
+            matrix.mapRect(rect)
+        }
+        return rect
     }
 }

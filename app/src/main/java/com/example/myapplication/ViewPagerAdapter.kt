@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
@@ -41,8 +43,9 @@ class ViewPagerAdapter(private val mList: ArrayList<Int>,private val itemListene
 
 //        注入bitmap
         holder.view.ImageViewShow.setImageBitmap(newBitmap)
+
         holder.view.ImageViewShow.setOnTouchListener { v, event ->
-            itemListener.OnItemTouch(position,event,holder.view.ImageViewShow)
+            itemListener.OnItemTouch(position,v,event,holder.view.ImageViewShow)
             true
         }
     }
@@ -51,6 +54,6 @@ class ViewPagerAdapter(private val mList: ArrayList<Int>,private val itemListene
         return mList.size
     }
     interface OnItemTouchListener {
-        fun OnItemTouch(postition: Int, v: MotionEvent, imageViewShow: ImageView)
+        fun OnItemTouch(postition: Int,view:View, v: MotionEvent, imageViewShow: ImageView)
     }
 }

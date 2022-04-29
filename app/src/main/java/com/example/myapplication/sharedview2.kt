@@ -10,6 +10,8 @@ import android.util.DisplayMetrics
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AppCompatActivity
 import com.example.myapplication.databinding.ActivitySharedview2Binding
 import kotlin.math.min
@@ -61,6 +63,8 @@ class sharedView2 : AppCompatActivity(){
                         imageindex -= 1
                     }
                     scaleback()
+                    val anim :Animation = AnimationUtils.loadAnimation(this,R.anim.from_left)
+                    binding.imageViewDetail2.startAnimation(anim)
                     binding.imageViewDetail2.setImageResource(imagelist[imageindex])
                     startfixscale()
                 }
@@ -72,6 +76,8 @@ class sharedView2 : AppCompatActivity(){
                         imageindex += 1
                     }
                     scaleback()
+                    val anim :Animation = AnimationUtils.loadAnimation(this,R.anim.from_right)
+                    binding.imageViewDetail2.startAnimation(anim)
                     binding.imageViewDetail2.setImageResource(imagelist[imageindex])
                     startfixscale()
                 }
