@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.widget.ViewPager2
 import com.example.myapplication.databinding.ActivitySharedViewBinding
+import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -83,24 +84,22 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
             MotionEvent.ACTION_MOVE ->{
                 if (mode== MODE_ZOOM){
                     val endDis=distance(event)
-                    scale = endDis/startDis
+                    scale = endDis / startDis
                     matrix.getValues(matrixValue)
                     val prescale = matrixValue[Matrix.MSCALE_X]
-                    if((prescale < maxscale && scale > minscale) ||(prescale > minscale && scale < minscale)){
-                        if(scale * prescale < minscale){
+                    if ((prescale < maxscale && scale > minscale) || (prescale > minscale && scale < minscale)) {
+                        if (scale * prescale < minscale) {
                             scale = minscale / prescale
                         }
-                        if(scale * prescale > maxscale){
+                        if (scale * prescale > maxscale) {
                             scale = maxscale / prescale
                         }
-                        matrix.postScale(scale,scale,midPoint.x,midPoint.y)
-                        versioncontrol(view.height.toFloat(),view.width.toFloat())
-                        view.animationMatrix=matrix
-
+                        matrix.postScale(scale, scale, midPoint.x, midPoint.y)
+                        versioncontrol(view.height.toFloat(), view.width.toFloat())
+                        view.animationMatrix = matrix
                     }
                 }
             }
-
             MotionEvent.ACTION_POINTER_UP ->{
                 mode = MODE_NONE
             }
