@@ -3,10 +3,12 @@ package com.example.myapplication
 import android.annotation.SuppressLint
 import android.graphics.Matrix
 import android.graphics.PointF
+import android.graphics.RectF
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.view.View
 import android.widget.ImageView
 import androidx.annotation.RequiresApi
@@ -28,13 +30,13 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
     }
 
     private var mode = MODE_NONE
-    private var startDis = 0f
     private val currentMatrix=Matrix()
+    var matrixValue = FloatArray(9)
     private val matrix=Matrix()
-    private var scale=0f
-    private val midPoint=PointF()
-    private var tempScale:Float? = null
-
+    private val maxscale:Float = 4.0f
+    private val minscale:Float = 1.0f
+    private var scaleFactor = 1.0f
+    private lateinit var scaleGestureDetector: ScaleGestureDetector
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,6 +44,7 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
         binding = ActivitySharedViewBinding.inflate(layoutInflater)
         setContentView(binding.root)
         initView()
+        scaleGestureDetector = ScaleGestureDetector(this,ScaleListener())
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -54,7 +57,6 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
                 @RequiresApi(Build.VERSION_CODES.Q)
                 override fun onPageScrollStateChanged(state: Int) {
                     view.animationMatrix=currentMatrix
-                    tempScale=null
                     super.onPageScrollStateChanged(state)
                 }
             })
@@ -65,64 +67,84 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
 
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onTouchEvent(view: View, event: MotionEvent) {
-
+        scaleGestureDetector.onTouchEvent(event)
         when(event.action and MotionEvent.ACTION_MASK){
-
             MotionEvent.ACTION_POINTER_DOWN->{
                 mode = if (event.pointerCount <= 2) MODE_ZOOM else MODE_NONE
-                if (mode== MODE_ZOOM){
-                    getMidPoint(event,midPoint)
-                    startDis = distance(event)
-                    currentMatrix.set(view.matrix)
-                }
             }
 
             MotionEvent.ACTION_MOVE ->{
-                if (mode== MODE_ZOOM){
-                    val endDis=distance(event)
-
-                    scale = endDis/startDis
-                    Log.d("mouse event","scale=${scale}")
-
-
-                    if (tempScale!=null)
-                        scale = if (scale<1f) tempScale!!*scale else tempScale!!+(scale-1)
-
-                    if (scale<1f){
-                        scale=1f
-                    }else if (scale>4f){
-                        scale=4f
-                    }
-
-
-
-                    matrix.set(currentMatrix)
-                    matrix.postScale(scale,scale,midPoint.x,midPoint.y)
-                    view.animationMatrix=matrix
-
-                }
+                binding.viewpager.isUserInputEnabled = mode != MODE_ZOOM
             }
-
             MotionEvent.ACTION_POINTER_UP ->{
                 mode = MODE_NONE
             }
             MotionEvent.ACTION_UP->{
                 mode= MODE_NONE
-                tempScale=scale
             }
 
         }
-        binding.viewpager.isUserInputEnabled = mode == MODE_NONE
         this.view=view
     }
-    private fun getMidPoint(event: MotionEvent,point: PointF){
-        val x=event.getX(1)+event.getX(0)
-        val y=event.getY(1)+event.getY(0)
-        point.x = x/2 ; point.y = y/2
+    private inner class ScaleListener : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+        override fun onScaleBegin(scaleGestureDetector: ScaleGestureDetector): Boolean {
+            return super.onScaleBegin(scaleGestureDetector)
+        }
+        @RequiresApi(Build.VERSION_CODES.Q)
+        override fun onScale(scaleGestureDetector: ScaleGestureDetector): Boolean {
+            scaleFactor = scaleGestureDetector.scaleFactor
+            val scale: Float = getscale()
+            if (scale < maxscale && scaleFactor > 1.0f || scale > minscale && scaleFactor < 1.0f) {
+                if (scaleFactor * scale < minscale){
+                    scaleFactor = minscale / scale
+                }
+                if (scaleFactor * scale > maxscale){
+                    scaleFactor = maxscale / scale
+                }
+                matrix.postScale(scaleFactor, scaleFactor, scaleGestureDetector.focusX, scaleGestureDetector.focusY)
+                versioncontrol(view.height.toFloat(), view.width.toFloat())
+                view.animationMatrix = matrix
+            }
+            return true
+        }
+
+        override fun onScaleEnd(scaleGestureDetector: ScaleGestureDetector) {
+            super.onScaleEnd(scaleGestureDetector)
+        }
     }
-    private fun distance(event: MotionEvent):Float{
-        val dx=event.getX(1)-event.getX(0)
-        val dy=event.getY(1)-event.getY(0)
-        return sqrt(dx*dx+dy*dy)
+    fun getscale() :Float{
+        matrix.getValues(matrixValue)
+        return matrixValue[Matrix.MSCALE_X]
+    }
+    fun versioncontrol(height:Float,width:Float){
+        val rectF = RectF()
+        rectF.set(0f, 0f, width,height)
+        matrix.mapRect(rectF)
+
+        var deltaX  = 0f
+        var deltaY  = 0f
+        if (rectF.width() >= width) {
+            if (rectF.left > 0) {
+                deltaX = -rectF.left
+            }
+            if (rectF.right < width) {
+                deltaX = width - rectF.right
+            }
+        }
+        if (rectF.height() >= height) {
+            if (rectF.top > 0) {
+                deltaY = -rectF.top
+            }
+            if (rectF.bottom < height) {
+                deltaY = height - rectF.bottom
+            }
+        }
+        if (rectF.width() < width) {
+            deltaX = width * 0.5f - rectF.right + 0.5f * rectF.width()
+        }
+        if (rectF.height() < height) {
+            deltaY = height * 0.5f - rectF.bottom + 0.5f * rectF.height()
+        }
+        matrix.postTranslate(deltaX, deltaY)
     }
 }

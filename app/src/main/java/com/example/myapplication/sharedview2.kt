@@ -7,6 +7,7 @@ import android.graphics.Matrix
 import android.graphics.RectF
 import android.os.Bundle
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener
@@ -124,6 +125,8 @@ class sharedView2 : AppCompatActivity(){
         override fun onScale(scaleGestureDetector: ScaleGestureDetector): Boolean {
             scaleFactor = scaleGestureDetector.scaleFactor
             val scale: Float = getscale()
+            Log.d("kkk1",scaleFactor.toString())
+            Log.d("kkk2",scale.toString())
             if (scale < maxscale && scaleFactor > 1.0f || scale > initscale && scaleFactor < 1.0f) {
                 if (scaleFactor * scale < initscale){
                     scaleFactor = initscale / scale
