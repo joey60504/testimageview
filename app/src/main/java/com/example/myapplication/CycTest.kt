@@ -28,14 +28,13 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
         const val MODE_NONE = 0
         const val MODE_ZOOM = 1
     }
-
-    private var mode = MODE_NONE
-    private val currentMatrix=Matrix()
-    var matrixValue = FloatArray(9)
-    private val matrix=Matrix()
+    private var scaleFactor = 1.0f
     private val maxscale:Float = 4.0f
     private val minscale:Float = 1.0f
-    private var scaleFactor = 1.0f
+    private var mode = MODE_NONE
+    private val matrix=Matrix()
+    private val currentMatrix=Matrix()
+    var matrixValue = FloatArray(9)
     private lateinit var scaleGestureDetector: ScaleGestureDetector
 
 
@@ -82,7 +81,6 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
             MotionEvent.ACTION_UP->{
                 mode= MODE_NONE
             }
-
         }
         this.view=view
     }
