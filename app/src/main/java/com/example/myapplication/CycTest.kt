@@ -32,7 +32,7 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
     private val maxscale:Float = 4.0f
     private val minscale:Float = 1.0f
     private var mode = MODE_NONE
-    private val matrix=Matrix()
+    private var matrix=Matrix()
     private val currentMatrix=Matrix()
     var matrixValue = FloatArray(9)
     private lateinit var scaleGestureDetector: ScaleGestureDetector
@@ -56,6 +56,7 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
                 @RequiresApi(Build.VERSION_CODES.Q)
                 override fun onPageScrollStateChanged(state: Int) {
                     view.animationMatrix=currentMatrix
+                    this@CycTest.matrix.setScale(1.0f,1.0f)
                     super.onPageScrollStateChanged(state)
                 }
             })
@@ -71,9 +72,9 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
             MotionEvent.ACTION_POINTER_DOWN->{
                 mode = if (event.pointerCount <= 2) MODE_ZOOM else MODE_NONE
             }
-
             MotionEvent.ACTION_MOVE ->{
-                binding.viewpager.isUserInputEnabled = mode != MODE_ZOOM
+                binding.viewpager.isUserInputEnabled  = mode != MODE_ZOOM
+                binding.viewpager.isUserInputEnabled  = getscale() == 1.0f
             }
             MotionEvent.ACTION_POINTER_UP ->{
                 mode = MODE_NONE
@@ -90,6 +91,7 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
         }
         @RequiresApi(Build.VERSION_CODES.Q)
         override fun onScale(scaleGestureDetector: ScaleGestureDetector): Boolean {
+
             scaleFactor = scaleGestureDetector.scaleFactor
             val scale: Float = getscale()
             if (scale < maxscale && scaleFactor > 1.0f || scale > minscale && scaleFactor < 1.0f) {
