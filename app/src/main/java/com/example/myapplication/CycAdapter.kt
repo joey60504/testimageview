@@ -41,7 +41,6 @@ class CycAdapter(private val Activity:ItemOnTouch): RecyclerView.Adapter<CycAdap
             this.setImageBitmap(BitmapFactory.decodeResource(resources,imageList[position]))
         }
 
-
         holder.view.ImageViewShow.setOnTouchListener { view, motionEvent ->
             holder.view.ImageViewShow.scaleType = ImageView.ScaleType.MATRIX
             Activity.onTouchEvent(view,motionEvent)

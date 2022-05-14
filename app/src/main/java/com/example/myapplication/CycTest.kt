@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.graphics.Matrix
 import android.graphics.PointF
 import android.graphics.RectF
+import android.opengl.ETC1.getWidth
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -24,14 +25,20 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
     private lateinit var binding: ActivitySharedViewBinding
     private lateinit var view: View
 
+    private var mode = MODE_NONE
     companion object{
         const val MODE_NONE = 0
         const val MODE_ZOOM = 1
+        const val MODE_MOVE = 2
     }
+
+    private var moveX = 1.0f
+    private var moveY = 1.0f
+
     private var scaleFactor = 1.0f
     private val maxscale:Float = 4.0f
     private val minscale:Float = 1.0f
-    private var mode = MODE_NONE
+
     private var matrix=Matrix()
     private val currentMatrix=Matrix()
     var matrixValue = FloatArray(9)
@@ -69,12 +76,30 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
     override fun onTouchEvent(view: View, event: MotionEvent) {
         scaleGestureDetector.onTouchEvent(event)
         when(event.action and MotionEvent.ACTION_MASK){
+            MotionEvent.ACTION_DOWN->{
+                if(event.pointerCount == 1 && getscale() > 1.0f){
+                    mode = MODE_MOVE
+                    moveX = event.x
+                    moveY = event.y
+                }
+            }
             MotionEvent.ACTION_POINTER_DOWN->{
-                mode = if (event.pointerCount <= 2) MODE_ZOOM else MODE_NONE
+                if (event.pointerCount == 2){
+                    mode = MODE_ZOOM
+                }
+                else{
+                    mode = MODE_NONE
+                }
             }
             MotionEvent.ACTION_MOVE ->{
                 binding.viewpager.isUserInputEnabled  = mode != MODE_ZOOM
                 binding.viewpager.isUserInputEnabled  = getscale() == 1.0f
+                if(mode == MODE_MOVE) {
+                    var dx = event.x - moveX;
+                    var dy = event.y - moveY;
+                    view.x = view.x + dx
+                    view.y = view.y + dy
+                }
             }
             MotionEvent.ACTION_POINTER_UP ->{
                 mode = MODE_NONE
@@ -102,7 +127,7 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
                     scaleFactor = maxscale / scale
                 }
                 matrix.postScale(scaleFactor, scaleFactor, scaleGestureDetector.focusX, scaleGestureDetector.focusY)
-                versioncontrol(view.height.toFloat(), view.width.toFloat())
+                versionControlScale(view.height.toFloat(), view.width.toFloat())
                 view.animationMatrix = matrix
             }
             return true
@@ -116,7 +141,7 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
         matrix.getValues(matrixValue)
         return matrixValue[Matrix.MSCALE_X]
     }
-    fun versioncontrol(height:Float,width:Float){
+    fun versionControlScale(height:Float,width:Float){
         val rectF = RectF()
         rectF.set(0f, 0f, width,height)
         matrix.mapRect(rectF)
