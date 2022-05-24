@@ -2,23 +2,19 @@ package com.example.myapplication
 
 import android.annotation.SuppressLint
 import android.graphics.Matrix
-import android.graphics.PointF
 import android.graphics.RectF
-import android.opengl.ETC1.getWidth
 import android.os.Build
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
-import android.widget.ImageView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.viewpager.widget.ViewPager
+import androidx.core.graphics.values
 import androidx.viewpager2.widget.ViewPager2
 import com.example.myapplication.databinding.ActivitySharedViewBinding
-import kotlin.math.pow
-import kotlin.math.sqrt
 
 
 class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
@@ -32,6 +28,7 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
         const val MODE_MOVE = 2
     }
 
+
     private var moveX = 1.0f
     private var moveY = 1.0f
 
@@ -41,6 +38,7 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
 
     private var matrix=Matrix()
     private val currentMatrix=Matrix()
+    private var scaledMatrix =Matrix()
     var matrixValue = FloatArray(9)
     private lateinit var scaleGestureDetector: ScaleGestureDetector
 
@@ -97,8 +95,7 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
                 if(mode == MODE_MOVE) {
                     var dx = event.x - moveX;
                     var dy = event.y - moveY;
-                    view.x = view.x + dx
-                    view.y = view.y + dy
+                    onDrag(dx,dy,view.width.toFloat(),view.height.toFloat(),view)
                 }
             }
             MotionEvent.ACTION_POINTER_UP ->{
@@ -129,6 +126,7 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
                 matrix.postScale(scaleFactor, scaleFactor, scaleGestureDetector.focusX, scaleGestureDetector.focusY)
                 versionControlScale(view.height.toFloat(), view.width.toFloat())
                 view.animationMatrix = matrix
+                scaledMatrix = matrix
             }
             return true
         }
@@ -141,11 +139,10 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
         matrix.getValues(matrixValue)
         return matrixValue[Matrix.MSCALE_X]
     }
-    fun versionControlScale(height:Float,width:Float){
+    fun versionControlScale(width:Float,height:Float){
         val rectF = RectF()
         rectF.set(0f, 0f, width,height)
         matrix.mapRect(rectF)
-
         var deltaX  = 0f
         var deltaY  = 0f
         if (rectF.width() >= width) {
@@ -171,5 +168,69 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
             deltaY = height * 0.5f - rectF.bottom + 0.5f * rectF.height()
         }
         matrix.postTranslate(deltaX, deltaY)
+    }
+    @RequiresApi(Build.VERSION_CODES.Q)
+    fun onDrag(xDiff:Float, yDiff:Float, width:Float, height:Float,view: View) {
+        var xDiff = xDiff
+        var yDiff = yDiff
+
+        val rectF = RectF()
+        rectF.set(0f, 0f, width,height)
+        matrix.mapRect(rectF)
+
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        val displayWidth = displayMetrics.widthPixels.toFloat()
+        val displayHeight = displayMetrics.heightPixels.toFloat()
+
+        when {
+            rectF.right - rectF.left < displayWidth -> {
+                xDiff = 0f
+            }
+            rectF.left + xDiff > 0 -> {
+                xDiff = if(rectF.left < 0){
+                    -rectF.left
+                }else{
+                    0f
+                }
+            }
+            rectF.right + xDiff < displayWidth -> {
+                xDiff = if(rectF.right > displayWidth){
+                    displayWidth - rectF.right
+                } else{
+                    0f
+                }
+            }
+        }
+        when {
+            rectF.bottom - rectF.top < displayHeight -> {
+                yDiff = 0f
+            }
+            rectF.top + yDiff > 0 -> {
+                yDiff = if(rectF.top < 0){
+                    -rectF.top
+                } else{
+                    0f
+                }
+            }
+            rectF.bottom + yDiff < displayHeight -> {
+                yDiff = if(rectF.bottom > displayHeight){
+                    displayHeight - rectF.bottom
+                } else{
+                    0f
+                }
+            }
+        }
+//TODO
+        matrix.set(scaledMatrix)
+        Log.d("kkk1",matrix.toShortString())
+        matrix.getValues(matrixValue)
+        val TransX = matrixValue[Matrix.MTRANS_X]
+        val TransY = matrixValue[Matrix.MTRANS_Y]
+        matrix.preTranslate(-TransX,-TransY)
+        Log.d("kkk2",matrix.toShortString())
+        matrix.postTranslate(xDiff,yDiff)
+        Log.d("kkk3",matrix.toShortString())
+        view.animationMatrix = matrix
     }
 }
