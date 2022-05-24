@@ -12,7 +12,6 @@ import android.view.ScaleGestureDetector
 import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.graphics.values
 import androidx.viewpager2.widget.ViewPager2
 import com.example.myapplication.databinding.ActivitySharedViewBinding
 
@@ -41,7 +40,6 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
     private var scaledMatrix =Matrix()
     var matrixValue = FloatArray(9)
     private lateinit var scaleGestureDetector: ScaleGestureDetector
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -127,6 +125,7 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
                 versionControlScale(view.height.toFloat(), view.width.toFloat())
                 view.animationMatrix = matrix
                 scaledMatrix = matrix
+                Log.d("kkk1111111","132")
             }
             return true
         }
@@ -221,16 +220,13 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
                 }
             }
         }
-//TODO
+        Log.d("kkkscaledmatrix",scaledMatrix.toShortString())
         matrix.set(scaledMatrix)
-        Log.d("kkk1",matrix.toShortString())
-        matrix.getValues(matrixValue)
-        val TransX = matrixValue[Matrix.MTRANS_X]
-        val TransY = matrixValue[Matrix.MTRANS_Y]
-        matrix.preTranslate(-TransX,-TransY)
-        Log.d("kkk2",matrix.toShortString())
+        Log.d("kkk",matrix.toShortString())
         matrix.postTranslate(xDiff,yDiff)
         Log.d("kkk3",matrix.toShortString())
         view.animationMatrix = matrix
+        matrix.set(scaledMatrix)
+        Log.d("kkk4",matrix.toShortString())
     }
 }
