@@ -77,6 +77,8 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
                     mode = MODE_MOVE
                     moveX = event.x
                     moveY = event.y
+                    Log.d("kkk123121313",scaledMatrix.toShortString())
+                    view.animationMatrix = scaledMatrix
                 }
             }
             MotionEvent.ACTION_POINTER_DOWN->{
@@ -124,13 +126,12 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
                 matrix.postScale(scaleFactor, scaleFactor, scaleGestureDetector.focusX, scaleGestureDetector.focusY)
                 versionControlScale(view.height.toFloat(), view.width.toFloat())
                 view.animationMatrix = matrix
-                scaledMatrix = matrix
-                Log.d("kkk1111111","132")
             }
             return true
         }
 
         override fun onScaleEnd(scaleGestureDetector: ScaleGestureDetector) {
+
             super.onScaleEnd(scaleGestureDetector)
         }
     }
@@ -220,13 +221,12 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
                 }
             }
         }
-        Log.d("kkkscaledmatrix",scaledMatrix.toShortString())
-        matrix.set(scaledMatrix)
-        Log.d("kkk",matrix.toShortString())
         matrix.postTranslate(xDiff,yDiff)
-        Log.d("kkk3",matrix.toShortString())
+        scaledMatrix = matrix
+        Log.d("kkk1",scaledMatrix.toShortString())
+        Log.d("kkk2",matrix.toShortString())
         view.animationMatrix = matrix
-        matrix.set(scaledMatrix)
-        Log.d("kkk4",matrix.toShortString())
+//        matrix.postTranslate(-xDiff,-yDiff)
+
     }
 }
