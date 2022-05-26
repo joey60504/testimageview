@@ -30,6 +30,8 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
 
     private var moveX = 1.0f
     private var moveY = 1.0f
+    private var XDiff = 0.0f
+    private var YDiff = 0.0f
 
     private var scaleFactor = 1.0f
     private val maxscale:Float = 4.0f
@@ -77,7 +79,6 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
                     mode = MODE_MOVE
                     moveX = event.x
                     moveY = event.y
-                    Log.d("kkk123121313",scaledMatrix.toShortString())
                     view.animationMatrix = scaledMatrix
                 }
             }
@@ -102,6 +103,10 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
                 mode = MODE_NONE
             }
             MotionEvent.ACTION_UP->{
+                if(mode == MODE_MOVE) {
+                scaledMatrix.postTranslate(XDiff, YDiff)
+                view.animationMatrix = scaledMatrix
+                }
                 mode= MODE_NONE
             }
         }
@@ -131,7 +136,7 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
         }
 
         override fun onScaleEnd(scaleGestureDetector: ScaleGestureDetector) {
-
+            scaledMatrix = matrix
             super.onScaleEnd(scaleGestureDetector)
         }
     }
@@ -171,8 +176,8 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
     }
     @RequiresApi(Build.VERSION_CODES.Q)
     fun onDrag(xDiff:Float, yDiff:Float, width:Float, height:Float,view: View) {
-        var xDiff = xDiff
-        var yDiff = yDiff
+        XDiff = xDiff
+        YDiff = yDiff
 
         val rectF = RectF()
         rectF.set(0f, 0f, width,height)
@@ -185,17 +190,17 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
 
         when {
             rectF.right - rectF.left < displayWidth -> {
-                xDiff = 0f
+                XDiff = 0f
             }
-            rectF.left + xDiff > 0 -> {
-                xDiff = if(rectF.left < 0){
+            rectF.left + XDiff > 0 -> {
+                XDiff = if(rectF.left < 0){
                     -rectF.left
                 }else{
                     0f
                 }
             }
-            rectF.right + xDiff < displayWidth -> {
-                xDiff = if(rectF.right > displayWidth){
+            rectF.right + XDiff < displayWidth -> {
+                XDiff = if(rectF.right > displayWidth){
                     displayWidth - rectF.right
                 } else{
                     0f
@@ -204,29 +209,26 @@ class CycTest:AppCompatActivity(),CycAdapter.ItemOnTouch {
         }
         when {
             rectF.bottom - rectF.top < displayHeight -> {
-                yDiff = 0f
+                YDiff = 0f
             }
-            rectF.top + yDiff > 0 -> {
-                yDiff = if(rectF.top < 0){
+            rectF.top + YDiff > 0 -> {
+                YDiff = if(rectF.top < 0){
                     -rectF.top
                 } else{
                     0f
                 }
             }
-            rectF.bottom + yDiff < displayHeight -> {
-                yDiff = if(rectF.bottom > displayHeight){
+            rectF.bottom + YDiff < displayHeight -> {
+                YDiff = if(rectF.bottom > displayHeight){
                     displayHeight - rectF.bottom
                 } else{
                     0f
                 }
             }
         }
-        matrix.postTranslate(xDiff,yDiff)
-        scaledMatrix = matrix
-        Log.d("kkk1",scaledMatrix.toShortString())
-        Log.d("kkk2",matrix.toShortString())
+        matrix.postTranslate(XDiff,YDiff)
         view.animationMatrix = matrix
-//        matrix.postTranslate(-xDiff,-yDiff)
+        matrix.postTranslate(-XDiff,-YDiff)
 
     }
 }
